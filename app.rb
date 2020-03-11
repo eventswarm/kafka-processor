@@ -27,7 +27,7 @@ end
 def kafka_props
   @props ||= Properties.new.tap do |props|
     props.put(StreamsConfig::APPLICATION_ID_CONFIG, "my-jruby-app");
-    props.put(StreamsConfig::BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+    props.put(StreamsConfig::BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
   end
 end
 

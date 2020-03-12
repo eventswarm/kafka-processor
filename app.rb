@@ -10,6 +10,9 @@ java_import 'org.apache.kafka.streams.StreamsConfig'
 java_import 'org.apache.kafka.streams.KafkaStreams'
 java_import 'java.util.Properties'
 
+# make sure we can connect from anywhere
+set :bind, '0.0.0.0'
+
 class Copier < AbstractProcessor  
   def process(key, value)
     context.forward(key,value)

@@ -10,6 +10,9 @@ java_import 'org.apache.kafka.streams.StreamsConfig'
 java_import 'org.apache.kafka.streams.KafkaStreams'
 java_import 'java.util.Properties'
 
+# make sure we can connect from anywhere
+set :bind, '0.0.0.0'
+
 class Copier < AbstractProcessor  
   def process(key, value)
     context.forward(key,value)
@@ -27,7 +30,7 @@ end
 def kafka_props
   @props ||= Properties.new.tap do |props|
     props.put(StreamsConfig::APPLICATION_ID_CONFIG, "my-jruby-app");
-    props.put(StreamsConfig::BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+    props.put(StreamsConfig::BOOTSTRAP_SERVERS_CONFIG, ENV['KAFKA_BROKER'] || 'localhost:9092');
   end
 end
 

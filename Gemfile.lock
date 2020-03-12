@@ -1,5 +1,5 @@
 GIT
-  remote: git@github.com:eventswarm/revs
+  remote: https://github.com/eventswarm/revs
   revision: 60b0e996947b0358618e27c1d5862d4d94e5853c
   specs:
     eventswarm-jar (1.0-java)
@@ -90,9 +90,6 @@ DEPENDENCIES
   jbundler
   revs!
   sinatra
-
-RUBY VERSION
-   ruby 2.5.0p0 (jruby 9.2.0.0)
 
 BUNDLED WITH
    2.1.4

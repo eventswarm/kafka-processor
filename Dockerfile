@@ -8,7 +8,7 @@ RUN bundle config --global frozen 1
 WORKDIR /usr/src/app
 
 # get dependencies installed
-COPY ./* ./
+COPY . .
 RUN bundle install
 RUN jruby -S jbundle install
 

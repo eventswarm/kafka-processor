@@ -26,7 +26,7 @@ Returns "pong".
 
 ### Get running streams:
 
-To a list of all current streams as JSON:
+To list all current streams as JSON:
 
 ```
 $ curl http://localhost:4567/streams

@@ -20,11 +20,12 @@ class Stream
     end
   end
 
-  def initialize(input, output, supplier)
+  def initialize(input, output, supplier, name)
     @input = input
     @output = output
-    @_supplier = supplier
     @id ||= self.class.hashids.encode(self.object_id)
+    @_supplier = supplier
+    @_name = name
   end
 
   def start
@@ -41,11 +42,11 @@ class Stream
   end
 
   def to_h
-    {id: @id, input: @input, output: @output, state: "#{@stream.state}", topology: "#{@topology.describe}"}
+    {id: @id, rule: @_name, input: @input, output: @output, state: "#{@stream.state}", topology: "#{@topology.describe}"}
   end
 
   def describe
-    "id: #{id}, input: #{@input}, output: #{@output}, stream state: #{@stream.state}, topology: #{@topology.describe}"
+    "id: #{@id}, rule: #{@_name}, input: #{@input}, output: #{@output}, stream state: #{@stream.state}, topology: #{@topology.describe}"
   end
 
   def props

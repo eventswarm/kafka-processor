@@ -1,8 +1,7 @@
 # app.rb
 
-# include current directory in load path
-$:.unshift(".").uniq!
-$:.unshift("./rules").uniq!
+# include current directory in load path since our dynamically loaded rules rely on it
+$:.unshift(File.dirname(__FILE__)).uniq!
 
 require 'sinatra'
 require 'sinatra/json'
@@ -22,6 +21,7 @@ java_import 'com.eventswarm.expressions.TrueExpression'
 # make sure we can connect from anywhere
 set :bind, '0.0.0.0'
 set :streams, {}
+set :rulesdir, File.join(File.dirname(__FILE__), "rules")
 
 class Copier < AbstractProcessor  
   def process(key, value)
@@ -89,7 +89,7 @@ post '/stream/:rule' do
   content_type :json
   params.merge!(json_params(request)) # accept params either via JSON or URL
 
-  require params[:rule]
+  load File.join(settings.rulesdir, "#{params[:rule]}.rb")
   klass = classify_rule(params[:rule])
   supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create) }
   json(make_stream(params, supplier)) + "\n"

@@ -4,6 +4,7 @@
 $:.unshift(".").uniq!
 
 require 'sinatra'
+require 'sinatra/json'
 require 'java'
 require 'jbundler'
 require 'eventswarm-jar'
@@ -11,18 +12,15 @@ require 'log4j-jar'
 require 'revs/log4_j_logger'
 require 'rule'
 require 'rule_processor'
+require 'stream'
 
 java_import 'org.apache.kafka.streams.processor.AbstractProcessor'
 java_import 'org.apache.kafka.streams.processor.ProcessorSupplier'
-java_import 'org.apache.kafka.streams.Topology'
-java_import 'org.apache.kafka.streams.StreamsConfig'
-java_import 'org.apache.kafka.streams.KafkaStreams'
-java_import 'org.apache.kafka.common.serialization.Serdes'
-java_import 'java.util.Properties'
 java_import 'com.eventswarm.expressions.TrueExpression'
 
 # make sure we can connect from anywhere
 set :bind, '0.0.0.0'
+set :streams, {}
 
 class Copier < AbstractProcessor  
   def process(key, value)
@@ -42,23 +40,16 @@ class BlockSupplier
   end
 end
 
-def kafka_props
-  @props ||= Properties.new.tap do |props|
-    props.put(StreamsConfig::APPLICATION_ID_CONFIG, "my-jruby-app");
-    props.put(StreamsConfig::BOOTSTRAP_SERVERS_CONFIG, ENV['KAFKA_BROKER'] || 'localhost:9092');
-    props.put(StreamsConfig::DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-    props.put(StreamsConfig::DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-  end
+def make_stream(params, supplier)
+  stream = Stream.new(params[:input], params[:output], supplier)
+  stream.start
+  settings.streams[stream.id] = stream # save the stream
+  stream.to_h
 end
 
-def make_stream(params, supplier, name="RULE")
-  topol = Topology.new
-    .addSource("SOURCE", params[:input])
-    .addProcessor(name, supplier, "SOURCE")
-    .addSink("SINK", params[:output], name)
-  str = KafkaStreams.new(topol, kafka_props)
-  str.start
-  "input: #{params[:input]}, output: #{params[:output]}, stream state: #{str.state}, topology: #{topol.describe}\n"
+def json_params(request)
+  body = request.body.read
+  body.empty? ? {} : JSON.parse(body)
 end
 
 get '/ping' do
@@ -66,18 +57,38 @@ get '/ping' do
 end
 
 # copy records from input topic to output topic using simple copier
-get '/copy' do
+post '/copy' do
+  content_type :json
+  params.merge!(json_params(request)) # accept params either via JSON or URL
+
   supplier = BlockSupplier.new do 
     Copier.new
   end
-  make_stream(params, supplier, "COPIER")
+  json(make_stream(params, supplier)) + "\n"
 end
 
-get '/true' do 
+post '/true' do
+  content_type :json
+  params.merge!(json_params(request)) # accept params either via JSON or URL
+
+  
   supplier = BlockSupplier.new do
     expr = TrueExpression.new   # use an always true expression
     rule = Rule.new(expr, expr) # expression is both entry point and match trigger
     RuleProcessor.new(rule)
   end
-  make_stream(params, supplier, "ALWAYS_TRUE")
+  json(make_stream(params, supplier)) + "\n"
+end
+
+get '/stream/:id' do |id|
+  json(settings.streams[id].to_h) + "\n"
+end
+
+get '/streams' do 
+  json(settings.streams.values.map{|value| value.to_h }) + "\n"
+end
+  
+delete '/stream/:id' do |id|
+  settings.streams[id].close
+  settings.streams.delete(id)
 end

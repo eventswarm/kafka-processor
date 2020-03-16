@@ -116,9 +116,11 @@ and downstream components registering _action(s)_ against those triggers. Trigge
 EventSwarm processing graphs are processed _depth first_, that is, actions against a trigger are called in order, and each action calls downstream
 actions registered against its triggers and so on before returning. There are classes that allow you to control this through queues and threading (i.e. actions to put an event in a queue for subsequent processing in a different thread).
 
+Events in EventSwarm are typed, although over time we have moved away from specific types to more generic event types based on wire format (e.g. JSONEvent). 
+
 Other concepts:
 
-| ---: | --- |
+| ---|---|
 | Expression | a component or chain of components that catches events matching an event expression |
 | ComplexExpression | an expression that matches multiple events (e.g. a sequence of matching events) | 
 | Matcher | A boolean expression relating to a single event, e.g. field `X > 1`, used within an expression |
@@ -130,7 +132,7 @@ Other concepts:
 
 ### Java sub-packages
 
-| ---: | --- |
+| ---|---|
 | top level | `Trigger` and `Action` interface definitions |
 | events | classes relating to construction and interrogation of events. The top level directory defines interfaces, implementations are in `jdo` |
 | eventset | Various event set and window implementations |

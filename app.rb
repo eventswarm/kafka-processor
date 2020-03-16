@@ -2,6 +2,7 @@
 
 # include current directory in load path
 $:.unshift(".").uniq!
+$:.unshift("./rules").uniq!
 
 require 'sinatra'
 require 'sinatra/json'
@@ -52,6 +53,10 @@ def json_params(request)
   body.empty? ? {} : JSON.parse(body)
 end
 
+def classify_rule(str)
+  Object.const_get("Rules::" + str.split('_').map(&:capitalize).join)
+end
+
 get '/ping' do
   "pong\n"
 end
@@ -77,6 +82,16 @@ post '/true' do
     rule = Rule.new(expr, expr) # expression is both entry point and match trigger
     RuleProcessor.new(rule)
   end
+  json(make_stream(params, supplier)) + "\n"
+end
+
+post '/stream/:rule' do
+  content_type :json
+  params.merge!(json_params(request)) # accept params either via JSON or URL
+
+  require params[:rule]
+  klass = classify_rule(params[:rule])
+  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create) }
   json(make_stream(params, supplier)) + "\n"
 end
 

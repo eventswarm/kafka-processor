@@ -8,6 +8,7 @@ require 'revs/triggers'
 
 java_import 'com.eventswarm.expressions.ExpressionMatchSet'
 java_import 'com.eventswarm.eventset.LastNWindow'
+java_import 'com.eventswarm.expressions.ComplexExpression'
 
 MAX_MATCHES = 100
 
@@ -25,6 +26,8 @@ class Rule
     logger.warn("Creating new rule")
     @add_action = add_action
     @match_set = ExpressionMatchSet.new(LastNWindow.new(MAX_MATCHES))
-    Triggers.match(match_trigger, @match_set)
+    match_trigger.java_kind_of?(ComplexExpression) ? 
+      Triggers.complex_match(match_trigger, @match_set) : 
+      Triggers.match(match_trigger, @match_set)
   end
 end

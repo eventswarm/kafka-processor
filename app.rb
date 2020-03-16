@@ -41,8 +41,8 @@ class BlockSupplier
   end
 end
 
-def make_stream(params, supplier)
-  stream = Stream.new(params[:input], params[:output], supplier)
+def make_stream(params, supplier, name)
+  stream = Stream.new(params[:input], params[:output], supplier, name)
   stream.start
   settings.streams[stream.id] = stream # save the stream
   stream.to_h
@@ -69,7 +69,7 @@ post '/copy' do
   supplier = BlockSupplier.new do 
     Copier.new
   end
-  json(make_stream(params, supplier)) + "\n"
+  json(make_stream(params, supplier, "copy")) + "\n"
 end
 
 post '/true' do
@@ -82,7 +82,7 @@ post '/true' do
     rule = Rule.new(expr, expr) # expression is both entry point and match trigger
     RuleProcessor.new(rule)
   end
-  json(make_stream(params, supplier)) + "\n"
+  json(make_stream(params, supplier, "true")) + "\n"
 end
 
 post '/stream/:rule' do
@@ -92,7 +92,7 @@ post '/stream/:rule' do
   load File.join(settings.rulesdir, "#{params[:rule]}.rb")
   klass = classify_rule(params[:rule])
   supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create) }
-  json(make_stream(params, supplier)) + "\n"
+  json(make_stream(params, supplier, params[:rule])) + "\n"
 end
 
 get '/stream/:id' do |id|

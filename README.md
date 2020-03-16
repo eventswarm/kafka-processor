@@ -120,6 +120,7 @@ Events in EventSwarm are typed, although over time we have moved away from speci
 
 Other concepts:
 
+| Concept | Explanation |
 | ---|---|
 | Expression | a component or chain of components that catches events matching an event expression |
 | ComplexExpression | an expression that matches multiple events (e.g. a sequence of matching events) | 
@@ -132,6 +133,7 @@ Other concepts:
 
 ### Java sub-packages
 
+| Package | Description | 
 | ---|---|
 | top level | `Trigger` and `Action` interface definitions |
 | events | classes relating to construction and interrogation of events. The top level directory defines interfaces, implementations are in `jdo` |

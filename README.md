@@ -96,7 +96,7 @@ This is the simplest approach. Steps:
 To work with the source you need to set up a JRuby 9.2 development environment. Steps:
 
 1. Use `rvm` or `rbenv` to set up a JRuby 9.2 environment
-2. Checkout: `git clone git@bitbucket.org:drpump95/kafka-processor` 
+2. Checkout: `git clone git@github.com:drpump/kafka-processor` 
 3. `cd kafka-processor`
 3. Use `bundle install` to grab the Ruby dependencies
 3. Use `jruby -S jbundle install` to grab the Java dependencies

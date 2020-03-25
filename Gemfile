@@ -8,7 +8,7 @@ gem 'sinatra-contrib'
 gem 'jbundler'
 
 # Pull our revs EventSwarm gem.
-gem 'revs', :git => 'https://github.com/eventswarm/revs', :branch => 'adb-refresh-java8'
+gem 'revs', :git => 'https://github.com/eventswarm/revs'
 
 # generate short identifiers for each stream instance
 gem 'hashids'

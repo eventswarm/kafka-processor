@@ -1,7 +1,6 @@
 GIT
   remote: https://github.com/eventswarm/revs
-  revision: 04e9984cde6b0e8255e1f2b8ef31cb7fa90b3486
-  branch: adb-refresh-java8
+  revision: cb9b1abb92b28f553128fffc9cc0911b1a497bb8
   specs:
     revs (2.0.0.SNAPSHOT-java)
       activesupport (~> 4.1)

@@ -1,9 +1,6 @@
 require 'java'
 require 'jbundler'
 require 'revs'
-# require 'eventswarm-jar'
-# require 'json-jar'
-# require 'log4j-jar'
 require 'revs/triggers'
 require 'revs/log4_j_logger'
 
@@ -26,9 +23,10 @@ class RuleProcessor < AbstractProcessor
   include AddEventAction
   include Log4JLogger
 
-  def initialize(rule)
+  def initialize(rule, name = nil)
     super()
     @rule = rule
+    @name = name || @rule.class.name
     Triggers.add(@rule.match_set, self) # catch matches from the rule
   end
 
@@ -50,14 +48,17 @@ class RuleProcessor < AbstractProcessor
   # When we have a match, forward it to the configured SINK or other downstream component
   #
   def execute(_trigger, event)
-    context.forward(forwards_key, as_json(event))
+    context.forward(forwards_key, match_notification(event))
+  end
+
+  def match_notification(event)
+    "{rule: \"#{@name}\", match: #{as_json(event)}}"
   end
 
   def as_json(event)
     if event.is_a?(Activity)
       # publish an array of the events in the match
-      result = event.get_events.map{|event| event.get_json_string}
-      "[ #{result.join(',')} ]"
+      "[#{event.get_events.map{|event| event.get_json_string}.join(',')}]"
     else
       # publish just the event that matched
       event.get_json_string

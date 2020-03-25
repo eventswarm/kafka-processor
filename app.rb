@@ -87,11 +87,12 @@ end
 post '/stream/:rule' do
   content_type :json
   params.merge!(json_params(request)) # accept params either via JSON or URL
+  rule = params[:rule]
 
-  load File.join(settings.rulesdir, "#{params[:rule]}.rb")
-  klass = classify_rule(params[:rule])
-  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create) }
-  json(make_stream(params, supplier, params[:rule])) + "\n"
+  load File.join(settings.rulesdir, "#{rule}.rb")
+  klass = classify_rule(rule)
+  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create, rule) }
+  json(make_stream(params, supplier, rule)) + "\n"
 end
 
 get '/stream/:id' do |id|

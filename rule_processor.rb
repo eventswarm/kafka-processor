@@ -52,7 +52,7 @@ class RuleProcessor < AbstractProcessor
   end
 
   def match_notification(event)
-    "{rule: \"#{@name}\", match: #{as_json(event)}}"
+    "{\"rule\": \"#{@name}\", \"match\": #{as_json(event)}}"
   end
 
   def as_json(event)

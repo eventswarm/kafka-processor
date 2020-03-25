@@ -1,8 +1,6 @@
 require 'java'
 require 'jbundler'
 require 'revs'
-require 'eventswarm-jar'
-require 'log4j-jar'
 require 'revs/log4_j_logger'
 require 'revs/triggers'
 

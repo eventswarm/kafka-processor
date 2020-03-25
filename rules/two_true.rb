@@ -1,5 +1,5 @@
 require 'java'
-require 'eventswarm-jar'
+# require 'eventswarm-jar'
 require 'rule'
 
 java_import 'com.eventswarm.expressions.TrueExpression'

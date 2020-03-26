@@ -24,9 +24,10 @@ class RuleProcessor < AbstractProcessor
   include AddEventAction
   include Log4JLogger
 
-  def initialize(rule, name = nil)
+  def initialize(rule)
     super()
     @rule = rule
+    logger.warn("Establishing processor for rule with params #{@rule.params}")
     Triggers.add(@rule.match_set, self) # catch matches from the rule
   end
 
@@ -52,10 +53,11 @@ class RuleProcessor < AbstractProcessor
   end
 
   #
-  # Since we're using java objects here, I need to encode explicitly 
+  # Since we're using java objects here, I can't rely on the json gem and need to encode explicitly 
   #
   def match_notification(event)
-    "{\"meta\": #{@rule.params.to_json}, \"match\": #{as_json(event)}}"
+    logger.warn("Match for rule with params #{@rule.params} and action #{@rule.add_action}")
+    "{\"rule\": #{@rule.params.to_json}, \"match\": #{as_json(event)}}"
   end
 
   def as_json(event)

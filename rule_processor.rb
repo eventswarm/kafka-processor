@@ -3,6 +3,7 @@ require 'jbundler'
 require 'revs'
 require 'revs/triggers'
 require 'revs/log4_j_logger'
+require 'json'
 
 java_import 'org.apache.kafka.streams.processor.AbstractProcessor'
 java_import 'org.apache.kafka.streams.processor.ProcessorSupplier'
@@ -26,7 +27,6 @@ class RuleProcessor < AbstractProcessor
   def initialize(rule, name = nil)
     super()
     @rule = rule
-    @name = name || @rule.class.name
     Triggers.add(@rule.match_set, self) # catch matches from the rule
   end
 
@@ -51,8 +51,11 @@ class RuleProcessor < AbstractProcessor
     context.forward(forwards_key, match_notification(event))
   end
 
+  #
+  # Since we're using java objects here, I need to encode explicitly 
+  #
   def match_notification(event)
-    "{\"rule\": \"#{@name}\", \"match\": #{as_json(event)}}"
+    "{\"meta\": #{@rule.params.to_json}, \"match\": #{as_json(event)}}"
   end
 
   def as_json(event)

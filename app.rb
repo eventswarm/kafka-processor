@@ -22,6 +22,8 @@ set :bind, '0.0.0.0'
 set :streams, {}
 set :rulesdir, File.join(File.dirname(__FILE__), "rules")
 
+FILTER_PARAMS=['input','output']
+
 class Copier < AbstractProcessor  
   def process(key, value)
     context.forward(key,value)
@@ -54,6 +56,10 @@ end
 
 def classify_rule(str)
   Object.const_get("Rules::" + str.split('_').map(&:capitalize).join)
+end
+
+def trim_params(params)
+  params.slice(*(params.keys - FILTER_PARAMS))
 end
 
 get '/ping' do
@@ -91,7 +97,7 @@ post '/stream/:rule' do
 
   load File.join(settings.rulesdir, "#{rule}.rb")
   klass = classify_rule(rule)
-  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create, rule) }
+  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create(trim_params(params)), rule) }
   json(make_stream(params, supplier, rule)) + "\n"
 end
 

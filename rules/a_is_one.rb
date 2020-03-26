@@ -18,9 +18,9 @@ java_import 'com.eventswarm.expressions.ConstantValue'
 #
 module Rules
   class AIsOne
-    def create
+    def create(params = {})
       expr = EventMatcherExpression.new(ValueEqualsMatcher.new(ConstantValue.new(1), JsonEvent::LongRetriever.new('a')))
-      Rule.new(expr, expr)
+      Rule.new(expr, expr, params)
     end
   end
 end

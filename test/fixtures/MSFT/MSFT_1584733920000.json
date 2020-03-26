@@ -1,5 +1,6 @@
 {
     "timestamp": 1584733920000,
+    "event": "quote",
     "open": 137.31,
     "high": 137.68,
     "low": 137.0,

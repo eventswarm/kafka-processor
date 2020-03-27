@@ -63,7 +63,7 @@ class RuleProcessor < AbstractProcessor
   def as_json(event)
     if event.is_a?(Activity)
       # publish an array of the events in the match
-      "[#{event.get_events.map{|event| event.get_json_string}.join(',')}]"
+      "[#{event.get_events.map{|event| as_json(event)}.join(',')}]"
     else
       # publish just the event that matched
       event.get_json_string

@@ -14,9 +14,9 @@ java_import 'com.eventswarm.expressions.SequenceExpression'
 #
 module Rules
   class TwoTrue
-    def create
+    def create(params = {})
       expr = SequenceExpression.new([TrueExpression.new,TrueExpression.new])
-      Rule.new(expr, expr)
+      Rule.new(expr, expr, params)
     end
   end
 end

@@ -1,0 +1,12 @@
+{
+    "timestamp": 1584734280000,
+    "event": "quote",
+    "open": 136.82,
+    "high": 137.79,
+    "low": 136.81,
+    "close": 137.2,
+    "volume": 841574,
+    "dividends": 0,
+    "stock splits": 0,
+    "symbol": "MSFT"
+}

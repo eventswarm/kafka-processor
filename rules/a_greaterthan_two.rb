@@ -17,9 +17,9 @@ java_import 'com.eventswarm.expressions.ConstantValue'
 #
 module Rules
   class AGreaterthanTwo
-    def create
+    def create(params = {})
       expr = NumericValueExpression.new(NumericValueExpression::Comparator::GREATER, ConstantValue.new(2), JsonEvent::LongRetriever.new('a'))
-      Rule.new(expr, expr)
+      Rule.new(expr, expr, params)
     end
   end
 end

@@ -56,6 +56,14 @@ def classify_rule(str)
   Object.const_get("Rules::" + str.split('_').map(&:capitalize).join)
 end
 
+def rule_params(params)
+  # remove input/output parameters and rename `rule` to `name`
+  params.slice(*(params.keys - ['input','output'])).tap do |p|
+    p[:name] = p[:rule]
+    p.delete(:rule)
+  end
+end
+
 get '/ping' do
   "pong\n"
 end
@@ -76,9 +84,10 @@ post '/true' do
   params.merge!(json_params(request)) # accept params either via JSON or URL
 
   
+  safe_params = Hash[rule_params(params)]
   supplier = BlockSupplier.new do
     expr = TrueExpression.new   # use an always true expression
-    rule = Rule.new(expr, expr) # expression is both entry point and match trigger
+    rule = Rule.new(expr, expr, rule_params(safe_params)) # expression is both entry point and match trigger
     RuleProcessor.new(rule)
   end
   json(make_stream(params, supplier, "true")) + "\n"
@@ -86,12 +95,13 @@ end
 
 post '/stream/:rule' do
   content_type :json
-  params.merge!(json_params(request)) # accept params either via JSON or URL
   rule = params[:rule]
+  params.merge!(json_params(request)) # accept params either via JSON or URL
 
   load File.join(settings.rulesdir, "#{rule}.rb")
   klass = classify_rule(rule)
-  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create, rule) }
+  safe_params = Hash[rule_params(params)]
+  supplier = BlockSupplier.new{ RuleProcessor.new(klass.new.create(safe_params)) }
   json(make_stream(params, supplier, rule)) + "\n"
 end
 

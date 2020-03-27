@@ -3,6 +3,7 @@ require 'jbundler'
 require 'revs'
 require 'revs/triggers'
 require 'revs/log4_j_logger'
+require 'json'
 
 java_import 'org.apache.kafka.streams.processor.AbstractProcessor'
 java_import 'org.apache.kafka.streams.processor.ProcessorSupplier'
@@ -23,10 +24,10 @@ class RuleProcessor < AbstractProcessor
   include AddEventAction
   include Log4JLogger
 
-  def initialize(rule, name = nil)
+  def initialize(rule)
     super()
     @rule = rule
-    @name = name || @rule.class.name
+    logger.warn("Establishing processor for rule with params #{@rule.params}")
     Triggers.add(@rule.match_set, self) # catch matches from the rule
   end
 
@@ -51,14 +52,18 @@ class RuleProcessor < AbstractProcessor
     context.forward(forwards_key, match_notification(event))
   end
 
+  #
+  # Since we're using java objects here, I can't rely on the json gem and need to encode explicitly 
+  #
   def match_notification(event)
-    "{\"rule\": \"#{@name}\", \"match\": #{as_json(event)}}"
+    logger.warn("Match for rule with params #{@rule.params} and action #{@rule.add_action}")
+    "{\"rule\": #{@rule.params.to_json}, \"match\": #{as_json(event)}}"
   end
 
   def as_json(event)
     if event.is_a?(Activity)
       # publish an array of the events in the match
-      "[#{event.get_events.map{|event| event.get_json_string}.join(',')}]"
+      "[#{event.get_events.map{|event| as_json(event)}.join(',')}]"
     else
       # publish just the event that matched
       event.get_json_string

@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/eventswarm/revs
-  revision: 2dd0598e6a55dd14ff3f1ff4c031d423377172ea
+  revision: 26d958ae459122ada35216ff02254aab13837dd9
   specs:
     revs (2.0.0.SNAPSHOT-java)
       activesupport (~> 4.1)

@@ -7,8 +7,10 @@ require 'revs/triggers'
 java_import 'com.eventswarm.events.JsonEvent'
 java_import 'com.eventswarm.expressions.ValueGradientExpression'
 java_import 'com.eventswarm.expressions.StringValueMatcher'
+java_import 'com.eventswarm.expressions.ANDMatcher'
+java_import 'com.eventswarm.expressions.ORMatcher'
 java_import 'com.eventswarm.eventset.EventMatchPassThruFilter'
-java_import 'com.eventswarm.expressions.SequenceExpression'
+java_import 'com.eventswarm.expressions.StrictSequenceExpression'
 java_import 'com.eventswarm.expressions.EventMatcherExpression'
 java_import 'java.util.ArrayList'
 
@@ -24,21 +26,50 @@ java_import 'java.util.ArrayList'
 module Rules
   class EndOfDayPriceChange
     include Log4JLogger
+
+    attr_reader :length, :path, :symbol, :direction
     
     INCREASE=1
 
     def create(params = {})
-      length = Integer(params["length"]) || 5
-      path = params["path"] || 'open'
-      symbol = params["symbol"] || 'MSFT'
-      direction = Integer(params["direction"]) || INCREASE
-      logger.warn("new EndOfDayPriceChange with length: #{length}, path: #{path}, symbol: #{symbol} and direction: #{direction}")
-      filter = EventMatchPassThruFilter.new(StringValueMatcher.new(symbol, JsonEvent::StringRetriever.new('symbol')))
-      gradient = ValueGradientExpression.new(length, JsonEvent::DoubleRetriever.new(path), direction)
-      end_of_day = EventMatcherExpression.new(StringValueMatcher.new("End Of Day", JsonEvent::StringRetriever.new('event')))
-      sequence = SequenceExpression.new(ArrayList.new([gradient, end_of_day]))
-      Triggers.add(filter,sequence)
-      Rule.new(filter, sequence, params)
+      process_params(params)
+      logger.warn("new EndOfDayPriceChange with length: #{@length}, path: #{@path}, symbol: #{@symbol} and direction: #{@direction}")
+      prefilter = filter(@symbol)
+      gradient = ValueGradientExpression.new(@length, JsonEvent::DoubleRetriever.new(@path), @direction)
+      end_of_day = EventMatcherExpression.new(match_eod)
+      sequence = StrictSequenceExpression.new(ArrayList.new([gradient, end_of_day]))
+      Triggers.add(prefilter,sequence)
+      Rule.new(prefilter, sequence, params)
+    end
+
+    def process_params(params) 
+      @length = Integer(params["length"]) || 5
+      @path = params["path"] || 'open'
+      @symbol = params["symbol"] || 'MSFT'
+      @direction = Integer(params["direction"]) || INCREASE
+    end
+
+    #
+    # Create a filter that ensures only quote and end_of_day events for the specified symbol are processed
+    #
+    def filter(symbol)
+      match_symbol = matcher(symbol, 'symbol') 
+      match_quote = matcher('quote', 'event')
+      quote_or_eod = ORMatcher.new(ArrayList.new([match_eod, match_quote]))
+      EventMatchPassThruFilter.new(ANDMatcher.new(ArrayList.new([match_symbol, quote_or_eod])))
+    end
+
+    #
+    # Want to use this matcher more than once
+    #
+    def match_eod
+      @_match_eod ||= matcher('End Of Day', 'event')
+    end
+    #
+    # Create an EventSwarm matcher that matches the specified value at the specified path in a JSON event
+    #
+    def matcher(value, path)
+      StringValueMatcher.new(value, JsonEvent::StringRetriever.new(path))
     end
   end
 end

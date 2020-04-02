@@ -5,7 +5,7 @@ require 'revs/log4_j_logger'
 require 'revs/triggers'
 
 java_import 'com.eventswarm.events.JsonEvent'
-java_import 'com.eventswarm.expressions. GradientExpression'
+java_import 'com.eventswarm.expressions.ValueGradientExpression'
 java_import 'com.eventswarm.expressions.StringValueMatcher'
 java_import 'com.eventswarm.expressions.ANDMatcher'
 java_import 'com.eventswarm.expressions.ORMatcher'

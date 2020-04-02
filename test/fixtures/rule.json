@@ -1,0 +1,48 @@
+{
+  "name": "end of day price change",
+  
+  "filters": [
+    {
+      type: "AND",
+      "filters" : [
+        {
+          "type": "equals",
+          "attribute": "symbol",
+          "value": "msft"
+        }
+        {
+          "type": "OR",
+          "filters": [
+            {
+              "type": "equals",
+              "attribute": "type",
+              "value": "open"
+            },
+            {
+              "type": "equals",
+              "attribute": "type",
+              "value": "End Of Day"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "expression" : {
+    "type": "sequence",
+    "expressions": [
+      {
+        "type": "gradient",
+        "min": 2,
+        "max": 5,
+        "direction": 1
+      },
+      {
+        "type": "equals",
+        "attribute": "type",
+        "value": "End Of Day"
+      }
+    ]
+  }
+}
